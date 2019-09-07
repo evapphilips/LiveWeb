@@ -3,4 +3,4 @@
 
 ### This repository contains my work for the Live Web course at ITP.
 
-- [Week 1](--)
+- [week 1](https://evapphilips.github.io/LiveWeb/week1/interactiveSelfPortrait/)
