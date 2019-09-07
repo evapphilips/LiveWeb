@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>This is a Title!</title>
+        <script type="text/javascript">
+
+        /*
+        var variableName = "This is a string variable"; // var is functional scope/ let is a block scope
+       // alert(variableName);
+
+       alert(Math.floor(Math.random() * 10));
+       */
+
+       window.addEventListener("load", init);
+       var everything;
+
+       function init(){
+           everything = document.getElementById("everything");
+           //setTimeout(doit, 5000);
+           everything.addEventListener("mouseover", doit);
+       }
+
+       function doit(){
+        everything.innerHTML = "NOTHING"
+        everything.style.color = "red";
+        everything.style.fontSize = "200px";
+       }
+       
+
+
+        </script>
+    </head>
+
+    <body>
+        This is <span id="everything">everything</span> that shows up on the page.
+
+    </body>
+</html>

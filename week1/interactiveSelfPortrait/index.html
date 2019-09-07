@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <title>Self Portrait</title>
+        <script type="text/javascript">
+
+        // when the page loads call the init function
+        window.addEventListener("load", init);
+
+        // custom init function
+        function init(){
+            console.log("All here")
+
+            // change name in header
+            let myName = document.getElementById("myName");
+            myName.addEventListener("mouseover", showName);
+            myName.addEventListener("mouseout", hideName);
+
+            // play videos when they are moused over
+            let video1 = document.getElementById("video1");
+            let video2 = document.getElementById("video2");
+            let video3 = document.getElementById("video3");
+            // play and pause videos when moused over video 1
+            video1.addEventListener("mouseover", playVideo);
+            video1.addEventListener("mouseout", pauseVideo);
+            // blur videos when moused over video 2
+            video2.addEventListener("mouseover", blurVideo)
+            video2.addEventListener("mouseout", unBlurVideo)
+            // change radius when moused over video 3
+            video3.addEventListener("mouseover", changeRadius);
+            video3.addEventListener("mouseout", unChangeRadius);
+
+
+        }
+
+        // change my to Eva
+        function showName(){
+            myName.innerHTML = "Eva Pearl Philips's";
+        }
+        // change Eva to my
+        function hideName(){
+            myName.innerHTML = "my";
+        }
+
+        // play video function
+        function playVideo(){
+            video1.play();
+            video2.playbackRate = 0.5;
+            video2.play();
+            video3.playbackRate = 0.25;
+            video3.play();
+        }
+        // pause video function
+        function pauseVideo(){
+            video1.pause();
+            video2.pause();
+            video3.pause();
+        }
+
+        // blur video function
+        function blurVideo(){
+            video1.style.filter = "blur(5px)";
+            video2.style.filter = "blur(10px)";
+            video3.style.filter = "blur(15px)";
+        }
+        // unblur video function
+        function unBlurVideo(){
+            video1.style.filter = "none";
+            video2.style.filter = "none";
+            video3.style.filter = "none";
+        }
+
+        // change radius funciton
+        function changeRadius(){
+            video1.style.borderRadius = "12.5%"
+            video2.style.borderRadius = "25%"
+            video3.style.borderRadius = "50%"
+        }
+
+        // un change radius funciton
+        function unChangeRadius(){
+            video1.style.borderRadius = "0%"
+            video2.style.borderRadius = "0%"
+            video3.style.borderRadius = "0%"
+        }
+
+        </script>
+    </head>
+
+    <body>
+        <h1>This is <em id="myName">my</em> self portrait</h1>
+        <video id="video1" width="30%" height="width" src="day69_vid1.mov" ></video>
+        <video id="video2" width="30%" height="width" src="day69_vid1.mov" ></video>
+        <video id="video3" width="30%" height="width" src="day69_vid1.mov" ></video>
+    </body>
+</html>
