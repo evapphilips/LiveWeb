@@ -1,0 +1,130 @@
+<html>
+	<head>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+
+			// socket connection 
+			var socket = io.connect();
+			
+			socket.on('connect', function() {
+				console.log("Connected");
+			});
+
+			// Receive from any event
+			var x = 0;
+			var y = 0;
+			socket.on('chatmessage', function (data) {
+				console.log("recieved:" + data);
+				let col = data.split(", ")
+				let colStr = "rgb(" + col[0] + ", " + col[1] + ", " + col[2] + ")";
+				var c = document.getElementById("myCanvas");
+				var ctx = c.getContext("2d");
+				ctx.fillStyle = colStr;
+				ctx.fillRect(x, y, 20, 20);
+				x += 20;
+				if(x>c.width-20){
+					x = 0;
+					y+=20;
+				}
+			 });
+			// Send message to others
+			var sendmessage = function(message) {
+				console.log("chatmessage: " + message);
+				socket.emit('chatmessage', message);
+			};
+
+			// when the page loads call the init function
+			window.addEventListener("load", init);
+			function init(){
+				// select color message
+				let colorMessage = document.getElementById("colorMessage");
+				// select sliders
+				let rSlider = document.getElementById("rSlider");
+				let gSlider = document.getElementById("gSlider");
+				let bSlider = document.getElementById("bSlider");
+				// select labels
+				let rLabel = document.getElementById("rLabel");
+				let gLabel = document.getElementById("gLabel");
+				let bLabel = document.getElementById("bLabel");
+				// update labels when slider changes
+				rSlider.addEventListener("click", changeRLabel);
+				gSlider.addEventListener("click", changeGLabel);
+				bSlider.addEventListener("click", changeBLabel);
+				
+			}
+			function changeRLabel(){
+				let val = rSlider.value;
+				rLabel.innerHTML = val;
+				// update color message to slider values
+				colorMessage.innerHTML = rSlider.value + ", " + gSlider.value + ", " + bSlider.value
+			}
+			function changeGLabel(){
+				let val = gSlider.value;
+				gLabel.innerHTML = val;
+				// update color message to slider values
+				colorMessage.innerHTML = rSlider.value + ", " + gSlider.value + ", " + bSlider.value
+			}
+			function changeBLabel(){
+				let val = bSlider.value;
+				bLabel.innerHTML = val;
+				// update color message to slider values
+				colorMessage.innerHTML = rSlider.value + ", " + gSlider.value + ", " + bSlider.value
+			}
+		</script>	
+
+<style>
+		
+		.slider {
+		  -webkit-appearance: none;
+		  width: 50%;
+		  height: 15px;
+		  border-radius: 5px;
+		  background: #d3d3d3;
+		  outline: none;
+		  opacity: 0.7;
+		  -webkit-transition: .2s;
+		  transition: opacity .2s;
+		}
+		
+		.slider:hover {
+		  opacity: 1;
+		}
+		
+		.slider::-webkit-slider-thumb {
+		  -webkit-appearance: none;
+		  appearance: none;
+		  width: 25px;
+		  height: 25px;
+		  border-radius: 50%;
+		  background: #000000;
+		  cursor: pointer;
+		}
+		
+		.slider::-moz-range-thumb {
+		  width: 25px;
+		  height: 25px;
+		  border-radius: 50%;
+		  background: #4CAF50;
+		  cursor: pointer;
+		}
+		</style>
+	</head>
+	
+	<body>
+		<center>
+			<h1 style="font-family: Arial, Helvetica, sans-serif">Collective Canvas</h1>
+			<input type="range" min="0" max="255" value="128" class="slider" id="rSlider"></input>
+			<h4>r: <span id=rLabel>128</span></h4>
+			<input type="range" min="0" max="255" value="128" class="slider" id="gSlider"></input>
+			<h4>g: <span id=gLabel>128</span></h4>
+			<input type="range" min="0" max="255" value="128" class="slider" id="bSlider"></input>
+			<h4>b: <span id=bLabel>128</span></h4>
+			<div id="colorMessage">128, 128, 128</div>
+			<div id="messages">  </div>
+			<input type="submit" value="submit" style="font-size: 16px; border-radius: 2px;" onclick="sendmessage(document.getElementById('colorMessage').innerHTML);"></input>
+			<div width="100%" height="50%" style="padding: 10px"><canvas id="myCanvas" width="600" height="400" style="border:1px solid #d3d3d3;">
+					Your browser does not support the HTML5 canvas tag.</canvas></div>
+		</center>
+	</body>
+
+</html>
