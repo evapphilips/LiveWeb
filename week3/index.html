@@ -1,0 +1,235 @@
+<html>
+	<head>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+		
+			var socket = io.connect('http://192.241.152.67:8080/');
+			
+			socket.on('connect', function() {
+				console.log("Connected");
+            });
+            
+            var groupState = [false, false, false, false];
+
+			// Receive from any event
+			socket.on('buttonState', function (data) {
+                console.log("Recieved:"+ data.state);
+                colorButton(data.state);
+                groupState[0] = data.state;
+                checkWin();
+            });
+            socket.on('buttonState1', function (data) {
+                console.log("Recieved:"+ data.state);
+                colorButton1(data.state);
+                groupState[1] = data.state;
+                checkWin();
+            });
+            socket.on('buttonState2', function (data) {
+                console.log("Recieved:"+ data.state);
+                colorButton2(data.state);
+                groupState[2] = data.state;
+                checkWin();
+            });
+            socket.on('buttonState3', function (data) {
+                console.log("Recieved:"+ data.state);
+                colorButton3(data.state);
+                groupState[3] = data.state;
+                checkWin();
+            });
+            socket.on('groupState', function (data) {
+                console.log("Recieved:"+ data.groupState);
+                groupState = data.groupState;
+                checkWin();
+			});
+            
+            // Send from mouse move event
+			var sendState = function(state) {
+				console.log("bottonState: " + state);
+				socket.emit('buttonState', {state: state});
+            };
+            var sendState1 = function(state) {
+				console.log("bottonState1: " + state);
+				socket.emit('buttonState1', {state: state});
+            };
+            var sendState2 = function(state) {
+				console.log("bottonState2: " + state);
+				socket.emit('buttonState2', {state: state});
+            };
+            var sendState3 = function(state) {
+				console.log("bottonState3: " + state);
+				socket.emit('buttonState3', {state: state});
+			};
+            var sendgroupState = function(groupState){
+                console.log("groupState: " + groupState);
+                socket.emit("groupState", {groupState: groupState});
+                checkWin();
+            }
+
+			///////////////
+            var button;
+            var button1;
+            var button2;
+            var button3;
+            var winTag;
+
+			var init = function() {
+                winTag = document.getElementById("winTag");
+        
+                // create reference to buttons
+                button = document.getElementById("button");
+                button1 = document.getElementById("button1");
+                button2 = document.getElementById("button2");
+                button3 = document.getElementById("button3");
+
+                // add eventlistener to button when moused over
+                button.addEventListener("mouseover", function() {
+                    console.log("mouse is over the button")
+                    // // fill the button with a color
+                    colorButton(true);
+                    // send the button state
+                    sendState(true);
+                    // set and send group state
+                    groupState[0] = true;
+                    sendgroupState(groupState);
+
+                })
+                // add eventlistener to button when moused out
+                button.addEventListener("mouseout", function() {
+                    console.log("mouse is no longer over the button");
+                    // empty the background color of the button
+                    colorButton(false);
+                    // send the button state
+                    sendState(false);
+                    // set and send group state
+                    groupState[0] = false;
+                    sendgroupState(groupState);
+                })
+
+                // add eventlistener to button1 when moused over
+                button1.addEventListener("mouseover", function() {
+                    console.log("mouse is over the button1")
+                    // // fill the button1 with a color
+                    colorButton1(true);
+                    // send the button1 state
+                    sendState1(true);
+                    // set and send group state
+                    groupState[1] = true;
+                    sendgroupState(groupState);
+                })
+                // add eventlistener to button1 when moused out
+                button1.addEventListener("mouseout", function() {
+                    console.log("mouse is no longer over the button1");
+                    // empty the background color of the button
+                    colorButton1(false);
+                    // send the button state
+                    sendState1(false);
+                    // set and send group state
+                    groupState[1] = false;
+                    sendgroupState(groupState);
+                })
+
+                // add eventlistener to button2 when moused over
+                button2.addEventListener("mouseover", function() {
+                    console.log("mouse is over the button2")
+                    // // fill the button2 with a color
+                    colorButton2(true);
+                    // send the button2 state
+                    sendState2(true);
+                    // set and send group state
+                    groupState[2] = true;
+                    sendgroupState(groupState);
+                })
+                // add eventlistener to button2 when moused out
+                button2.addEventListener("mouseout", function() {
+                    console.log("mouse is no longer over the button2");
+                    // empty the background color of the button
+                    colorButton2(false);
+                    // send the button state
+                    sendState2(false);
+                    // set and send group state
+                    groupState[2] = false;
+                    sendgroupState(groupState);
+                })
+
+                // add eventlistener to button3 when moused over
+                button3.addEventListener("mouseover", function() {
+                    console.log("mouse is over the button3")
+                    // // fill the button1 with a color
+                    colorButton3(true);
+                    // send the button1 state
+                    sendState3(true);
+                    // set and send group state
+                    groupState[3] = true;
+                    sendgroupState(groupState);
+                })
+                // add eventlistener to button3 when moused out
+                button3.addEventListener("mouseout", function() {
+                    console.log("mouse is no longer over the button3");
+                    // empty the background color of the button
+                    colorButton3(false);
+                    // send the button state
+                    sendState3(false);
+                    // set and send group state
+                    groupState[3] = false;
+                    sendgroupState(groupState);
+                })
+
+            };
+
+            // change button color
+            var colorButton = function(state) {
+                if(state){
+                    // fill the button with a color
+                    button.style.backgroundColor = "rgb(0, 0, 0)";
+                }else{
+                    // empty the background color of the button
+                    button.style.backgroundColor = "transparent";
+                }  
+            }
+            var colorButton1 = function(state) {
+                if(state){
+                    // fill the button with a color
+                    button1.style.backgroundColor = "rgb(0, 0, 0)";
+                }else{
+                    // empty the background color of the button
+                    button1.style.backgroundColor = "transparent";
+                }  
+            }
+            var colorButton2 = function(state) {
+                if(state){
+                    // fill the button with a color
+                    button2.style.backgroundColor = "rgb(0, 0, 0)";
+                }else{
+                    // empty the background color of the button
+                    button2.style.backgroundColor = "transparent";
+                }  
+            }
+            var colorButton3 = function(state) {
+                if(state){
+                    // fill the button with a color
+                    button3.style.backgroundColor = "rgb(0, 0, 0)";
+                }else{
+                    // empty the background color of the button
+                    button3.style.backgroundColor = "transparent";
+                }  
+            }
+
+            var checkWin = function(){
+                if(groupState[0] && !groupState[1] && groupState[2] && !groupState[3]){
+                    winTag.innerHTML = "Congratulations, you solved the puzzle!";
+                }else{
+                    winTag.innerHTML = "<i>Odds</i> are, you wont solve this puzzle!"
+                }
+            }
+	
+		</script>	
+	</head>
+	<body onload="init();">
+        <!--<canvas width="600" height="600" id="mycanvas" />-->
+        <center><h1 id="winTag"><i>Odds</i> are, you wont solve this puzzle!</h1></center>
+        <button id="button" style=" border-block-width: 4px; border-color: black; position: absolute; top: 15%; left: 45%; width: 100px; height: 100px; border-radius: 50%"></button>
+        <button id="button1" style=" border-block-width: 4px; border-color: black; position: absolute; top: 35%; left: 45%; width: 100px; height: 100px; border-radius: 50%"></button>
+        <button id="button2" style=" border-block-width: 4px; border-color: black; position: absolute; top: 55%; left: 45%; width: 100px; height: 100px; border-radius: 50%"></button>
+        <button id="button3" style=" border-block-width: 4px; border-color: black; position: absolute; top: 75%; left: 45%; width: 100px; height: 100px; border-radius: 50%"></button>
+	</body>
+</html>
