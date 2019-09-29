@@ -1,0 +1,75 @@
+<html>
+	<head>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+
+		// socket setup
+
+		var socket = io.connect();
+			
+		socket.on('connect', function() {
+			console.log("Connected");
+		});
+
+		socket.on('imageData', function(data) {
+				// Incoming image..
+				//console.log("here is the data: " + data);
+
+				// place someone elses image on your canvas
+				var otherImg = document.getElementById('otherImg');
+				//var otherImg = document.createElement("img");
+				otherImg.style.top = Math.random()*100 + "%";
+				otherImg.style.left = Math.random()*100 + "%";
+				//document.getElementById('imageDiv').appendChild(otherImg);
+				otherImg.src = data;
+			});
+
+		// load setup
+		window.addEventListener('load', function() {
+			// Video Setup
+			// access the video
+			var video = document.getElementById('myVideo');
+			// video constraints
+			let constraints = { audio: false, video: true };
+			// Prompt the user for permission, get the stream
+			navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+				/* Use the stream */
+				// Attach to our video object
+				video.srcObject = stream;
+				// Wait for the stream to load enough to play
+				video.onloadedmetadata = function(e) {
+					video.play();
+				};
+			})
+			.catch(function(err) {
+				/* Handle the error */
+				alert(err);
+			});
+
+			// Canvas Setup
+			// access the canvas
+			var myCanvas = document.getElementById('myCanvas');
+			var ctx = myCanvas.getContext('2d');
+			//ctx.fillStyle="#FFFFFF";
+			//ctx.fillRect(0, 0, myCanvas.width, myCanvas.height);
+			// when mouse is clicked, take an image, show it, and send it
+			window.addEventListener('click', function(e) {
+				// show image at that moment
+				ctx.drawImage(video, 10, 10);
+				// get image data
+				let myImageData = myCanvas.toDataURL("image/jpeg");
+				// send image data to everyone else
+				socket.emit('imageData', myImageData);
+			});
+		});
+
+	
+		</script>	
+	</head>
+ <body>
+	 <video id="myVideo" height="480" width="720" muted></video>
+	 <canvas id="myCanvas" height="480" width="720" style="visibility:hidden"></canvas>
+	 <!--<div id="imageDiv"></div>-->
+	 <img id="otherImg" height="48" width="72" src="" style="position: absolute; top: 0px; left: 0px"></img>
+ </body>
+</html>
