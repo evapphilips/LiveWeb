@@ -1,0 +1,311 @@
+<html>
+
+<head>
+    <title>Collaborative Puzzles</title>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript">
+
+        // Create web socket variable
+        var socket = io.connect();
+
+        // Global Variables
+        var gridButtons = [];
+        var buttonStates = [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false];
+        var currentLevel = 0;
+        var clues = ["X marks the spot", "Get your ducks in a row", "Do you think you can get a hole in one", "Dont be catty, it's just a corner", "Think outside the box", "Congratulations! <br>You worked together and completed all the challenges!"]
+        var level1String = "true,false,false,true,false,true,true,false,false,true,true,false,true,false,false,true"
+        var level2String = "false,false,false,false,true,true,true,true,false,false,false,false,false,false,false,false"
+        var level3String = "false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false"
+        var level4String = "true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true"
+        var level5String = "false,false,false,false,true,false,false,false,false,false,false,false,false,false,false,false"
+        
+        // var level1String = "true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false"
+        // var level2String = "true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false"
+        // var level3String = "true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false"
+        // var level4String = "true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false"
+        // var level5String = "false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false"
+        var nextButton;
+        var restartButton;
+        var atEnd = false;
+        var extraButton;
+        var overExtra = false;
+ 
+        // When connected to the socket
+        socket.on('connect', function () {
+            console.log("Connected");
+        });
+
+        // When you recieve mouse position from another client
+        socket.on('coordinates', function (data) {
+            //console.log("Client recieved mouse position: " + data.x + ", " + data.y);
+        })
+
+        // When you recieve button state form another client
+        socket.on('buttonState', function (data) {
+            //console.log("got button state: " + data);
+            for (let i = 0; i < buttonStates.length; i++) {
+                buttonStates[i] = data[i];
+                if (buttonStates[i]) {
+                    gridButtons[i].className = "gridButtonFilled";
+                } else {
+                    gridButtons[i].className = "gridButton";
+                }
+            }
+
+            // Level 1
+            if (currentLevel == 0) {
+                if (buttonStates.toString() == level1String) {
+                    nextButton.style.visibility = "visible"
+                }
+            }
+            // Level 2
+            if (currentLevel == 1) {
+                if (buttonStates.toString() == level2String) {
+                    nextButton.style.visibility = "visible"
+                }
+            }
+            // Level 3
+            if (currentLevel == 2) {
+                if (buttonStates.toString() == level3String) {
+                    nextButton.style.visibility = "visible"
+                }
+            }
+            // Level 4
+            if (currentLevel == 3) {
+                if (buttonStates.toString() == level4String) {
+                    nextButton.style.visibility = "visible"
+                }
+            }
+            // Level 5
+            if (currentLevel == 4) {
+                if (buttonStates.toString() == level5String && overExtra == true) {
+                    nextButton.innerHTML = "end"
+                    nextButton.style.visibility = "visible"
+                }
+                extraButton.style.visibility = "visible";
+            }
+            // Level 6 - End
+            if (currentLevel == 5) {
+                nextButton.innerHTML = "next";
+                atEnd = true;
+                restartButton.innerHTML = "restart";
+                restartButton.style.visibility = "visible";
+                for (let i = 0; i < gridButtons.length; i++) {
+                    gridButtons[i].style.visibility = "hidden";
+                }
+            }
+        })
+
+        // When you recieve a level from another client
+        socket.on('nextLevel', function (data) {
+            console.log(data);
+            nextButton.style.visibility = "hidden";
+            currentLevel = data;
+            clue.innerHTML = clues[currentLevel];
+
+            // Level 6 - at game end
+            if (currentLevel == 5) {
+                nextButton.innerHTML = "next";
+                atEnd = true;
+                    restartButton.innerHTML = "restart";
+                    restartButton.style.visibility = "visible";
+                    for (let i = 0; i < gridButtons.length; i++) {
+                        gridButtons[i].style.visibility = "hidden";
+                    }
+                extraButton.style.visibility = "hidden"
+            }
+        })
+
+        // When you recieve the beginning state from another client
+        socket.on('toBeginning', function(data){
+            // if we are at the beginning, show the beginning page
+            if(data){
+                currentLevel = 0;
+                restartButton.innerHTML = "play"
+                clue.innerHTML = "Collaborative Puzzles"
+                atEnd = false;
+            }else{
+                restartButton.style.visibility = "hidden";
+                for (let i = 0; i < gridButtons.length; i++) {
+                    gridButtons[i].style.visibility = "visible";
+                }
+                clue.innerHTML = clues[0];
+            }
+        })
+
+        // When you recieve the extra button state from another client
+        socket.on('extraState', function(data){
+            console.log(data);
+            overExtra = data;
+            nextButton.innerHTML = "end"
+            nextButton.style.visibility = "visible"
+            if(overExtra){
+                extraButton.className = "extraGridButtonFilled";
+            }else{
+                extraButton.className = "extraGridButton";
+            }
+
+        })
+
+        // When page loads, run init function
+        window.addEventListener('load', init);
+
+        // init function
+        function init() {
+            // // When the mouse moves, get and send coords
+            // window.addEventListener('mousemove', getCoords)
+            // function getCoords(event) {
+            //     // get my coordinates
+            //     var coord = {
+            //         x: event.clientX,
+            //         y: event.clientY
+            //     }
+            //     //console.log("My Coordinates: " + coord.x + ", " + coord.y);
+            //     // send my coordinates to everyone
+            //     socket.emit('coordinates', coord);
+            // }
+
+            // Deal with state of buttons
+            // put all the grid buttons in an array
+            for (let i = 0; i < 16; i++) {
+                var idName = "gridButton" + (i + 1);
+                gridButtons.push(document.getElementById(idName));
+            }
+            //gridButton = document.getElementById("gridButton1");
+            for (let i = 0; i < gridButtons.length; i++) {
+                // When mouse is over gridButton, send button state
+                gridButtons[i].addEventListener('mouseover', buttonStateOver);
+                function buttonStateOver(event) {
+                    gridButtons[i].className = "gridButtonFilled";
+                    //var buttonState = true;
+                    buttonStates[i] = true;
+                    socket.emit('buttonState', buttonStates);
+                }
+
+                // When mouse is leaves gridButton, send button state
+                gridButtons[i].addEventListener('mouseout', buttonStateOut);
+                function buttonStateOut(event) {
+                    gridButtons[i].className = "gridButton";
+                    //var buttonState = false;
+                    buttonStates[i] = false;
+                    socket.emit('buttonState', buttonStates);
+                }
+            }
+
+            // access clue
+            clue = document.getElementById("clue");
+            // access next button
+            nextButton = document.getElementById("next");
+            nextButton.style.visibility = "hidden";
+            // when next button is pressed
+            nextButton.addEventListener('click', nextLevel);
+            function nextLevel(event) {
+                nextButton.style.visibility = "hidden";
+                currentLevel++
+                //console.log(currentLevel);
+                clue.innerHTML = clues[currentLevel];
+                socket.emit('nextLevel', currentLevel);
+                // show extra button
+                if(currentLevel == 4){
+                    extraButton.style.visibility = "visible";
+                }
+                if(currentLevel == 5){
+                    atEnd = true;
+                    restartButton.innerHTML = "restart";
+                    restartButton.style.visibility = "visible";
+                    for (let i = 0; i < gridButtons.length; i++) {
+                        gridButtons[i].style.visibility = "hidden";
+                    }
+                    extraButton.style.visibility = "hidden";
+                    nextButton.style.visibility = "hidden";
+                }
+            }
+
+            // access restart button 
+            restartButton = document.getElementById("restartButton");
+            // when restart button is pressed
+            restartButton.addEventListener('click', start);
+            function start(event){
+                if(atEnd){
+                    currentLevel = 0;
+                    atEnd = true;
+                    restartButton.innerHTML = "play"
+                    clue.innerHTML = "Collaborative Puzzles"
+                    socket.emit('toBeginning', atEnd);
+                    atEnd = false;
+                }else{
+                    atEnd = false;
+                    restartButton.style.visibility = "hidden";
+                    for (let i = 0; i < gridButtons.length; i++) {
+                        gridButtons[i].style.visibility = "visible";
+                    }
+                    clue.innerHTML = clues[0];
+                    socket.emit('toBeginning', atEnd)
+                }
+                
+            }
+
+            // access extra grid button
+            extraButton = document.getElementById("extraButton");
+            extraButton.addEventListener('mouseover', onExtra);
+            function onExtra(){
+                overExtra = true;
+                nextButton.innerHTML = "end"
+                nextButton.style.visibility = "visible"
+                extraButton.className = "extraGridButtonFilled";
+                socket.emit('extraState', overExtra);
+            }
+            extraButton.addEventListener('mouseout', offExtra);
+            function offExtra(){
+                overExtra = false;
+                extraButton.className = "extraGridButton";
+                socket.emit('extraState', overExtra);
+            }
+
+
+            // When the page first loads
+            restartButton.style.visibility = "visible";
+            for (let i = 0; i < gridButtons.length; i++) {
+                gridButtons[i].style.visibility = "hidden";
+            }
+
+        }
+    </script>
+</head>
+
+<body style="background-color: #3D5168;">
+    <center>
+        <h2 id="clue" class="clue">Collaborative Puzzles</h2>
+        <div class="grid-container">
+            <div class="gridButton" id="gridButton1"></div>
+            <div class="gridButton" id="gridButton2"></div>
+            <div class="gridButton" id="gridButton3"></div>
+            <div class="gridButton" id="gridButton4"></div>
+            <div class="gridButton" id="gridButton5"></div>
+            <div class="gridButton" id="gridButton6"></div>
+            <div class="gridButton" id="gridButton7"></div>
+            <div class="gridButton" id="gridButton8"></div>
+            <div class="gridButton" id="gridButton9"></div>
+            <div class="gridButton" id="gridButton10"></div>
+            <div class="gridButton" id="gridButton11"></div>
+            <div class="gridButton" id="gridButton12"></div>
+            <div class="gridButton" id="gridButton13"></div>
+            <div class="gridButton" id="gridButton14"></div>
+            <div class="gridButton" id="gridButton15"></div>
+            <div class="gridButton" id="gridButton16"></div>
+        </div>
+        <div style="height: 15%"></div>
+        <div>
+            <button id="next" class="nextButton">next &#8250</button>
+        </div>
+        <div>
+            <button id="restartButton" class="floating" style="visibility: hidden;">play</button>
+        </div>
+        <div>
+            <div class="extraGridButton" id="extraButton" style="visibility: hidden;"></div>
+        </div>
+    </center>
+</body>
+
+</html>
