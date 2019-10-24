@@ -1,0 +1,124 @@
+<html>
+    <head>
+        <title>Week 8</title>
+        <script type="text/javascript">
+
+        // when page loads, call load function
+        window.addEventListener('load', init);
+
+        // define load function
+        function init(){
+            // access video element
+            let video = document.getElementById("theVideo");
+
+            // place the webcam video on the video element
+            let constraints = {audio: false, video: true};
+            navigator.mediaDevices.getUserMedia(constraints).then(function(stream){
+                // use the stream
+                video.srcObject = stream;
+                // wait for stream to load enough to place
+                video.onloadedmetadata = function(event){
+                    video.play();
+                    draw();
+                }
+            })
+            .catch(function(err){
+                alert(err);
+            });
+
+            // access canvas element
+            let canvas = document.getElementById('theCanvas');
+            let context = canvas.getContext('2d');
+
+            // draw video, etc on canvas
+            function draw(){
+                console.log('drawing');
+                // draw the video on the canvas
+                context.drawImage(video, 0, 0, video.width, video.height);
+                // get the pixels
+                let imageData = context.getImageData(0, 0, 640/2, 480/2);
+                let imageData2 = context.getImageData(640/2, 0, 640/2, 480/2);
+                let imageData3 = context.getImageData(640/2, 480/2, 640/2, 480/2);
+                let imageData4 = context.getImageData(0, 480/2, 640/2, 480/2);
+
+                let pixelData = imageData.data;
+                let pixelData2 = imageData2.data;
+                let pixelData3 = imageData3.data;
+                let pixelData4 = imageData4.data;
+
+                // iterate through the top left pixels
+                for(var i=0, n=pixelData.length; i<n; i+=4){
+                    let red = pixelData[i];
+					let green = pixelData[i + 1];
+					let blue = pixelData[i + 2];
+					let alpha = pixelData[i + 3];
+		  
+					// Set one
+					pixelData[i] = red;
+					pixelData[i + 1] = 128;
+					pixelData[i + 2] = 128;
+					pixelData[i + 3] = 255;
+                }
+
+                // iterate through the top right pixels
+                for(var i=0, n=pixelData2.length; i<n; i+=4){
+                    let red = pixelData2[i];
+					let green = pixelData2[i + 1];
+					let blue = pixelData2[i + 2];
+					let alpha = pixelData2[i + 3];
+		  
+					// Set one
+					pixelData2[i] = 128;
+					pixelData2[i + 1] = green;
+					pixelData2[i + 2] = 128;
+					pixelData2[i + 3] = 255;
+                }
+
+                // iterate through the bottom left pixels
+                for(var i=0, n=pixelData3.length; i<n; i+=4){
+                    let red = pixelData3[i];
+					let green = pixelData3[i + 1];
+					let blue = pixelData3[i + 2];
+					let alpha = pixelData3[i + 3];
+		  
+					// Set one
+					pixelData3[i] = 128;
+					pixelData3[i + 1] = 128;
+					pixelData3[i + 2] = blue;
+					pixelData3[i + 3] = 255;
+                }
+
+                // iterate through the bottom right pixels
+                for(var i=0, n=pixelData4.length; i<n; i+=4){
+                    let red = pixelData4[i];
+					let green = pixelData4[i + 1];
+					let blue = pixelData4[i + 2];
+					let alpha = pixelData4[i + 3];
+		  
+					// Set one
+					pixelData4[i] = red;
+					pixelData4[i + 1] = 128;
+					pixelData4[i + 2] = red;
+					pixelData4[i + 3] = 128;
+                }
+
+                // place them back on the canvas
+                context.putImageData(imageData, video.width/2, video.height/2);
+                context.putImageData(imageData2, 0, video.height/2);
+                context.putImageData(imageData3, 0, 0);
+                context.putImageData(imageData4, video.width/2, 0);
+
+                // Draw again in 3 seconds
+                setTimeout(draw, 3000);
+            }
+
+        }
+        </script>
+
+    </head>
+    <body>
+        <video id="theVideo" width="640" height="480" hidden></video>
+        <canvas id="theCanvas" width="640" height="480"></canvas>
+        
+    </body>
+</html>
