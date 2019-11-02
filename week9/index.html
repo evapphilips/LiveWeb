@@ -1,0 +1,127 @@
+<html>
+    <head>
+        <title>Grocery List</title>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript">
+
+        // variables
+        var counter = 0;
+
+        // connect to the socket
+        var socket = io.connect();
+
+        // check connection to socket
+        socket.on('connect', function() {
+			console.log("Connected");
+
+			// Once we are connected, request the history
+			socket.emit('history', null);
+		});
+
+        // recieve information from an event
+        // when a new item is added
+        socket.on('updateListItem', function(newListItem){
+            console.log("Recieve a new list item: " + newListItem.item);
+            console.log("With State: " + newListItem.completed);
+
+            // create a paragraph element for each list item
+            var itemText = document.createElement("P");
+            itemText.innerHTML = newListItem.item;
+            itemText.id = counter.toString() + "-" + counter.toString();
+            document.body.appendChild(itemText); 
+            // create check button for each list item
+            var itemBox = document.createElement("BUTTON");
+            if(newListItem.completed){
+                itemBox.innerHTML = "&#10004";
+            }
+            itemBox.id = counter.toString();
+            document.body.appendChild(itemBox); 
+
+            // call event listener function
+            listBoxCreated(itemBox.id, newListItem.item);
+
+            // increase counter
+            counter ++
+        })
+
+        // when an item is updated
+        socket.on('removeExistingItems', function(updatedList){
+            // first remove all the exisiting item buttons
+            for(let i=0; i<counter; i++){
+                var toRemoveButton = document.getElementById(i.toString());
+                toRemoveButton.parentNode.removeChild(toRemoveButton);
+                var toRemoveText = document.getElementById(i.toString() + "-" +i.toString());
+                toRemoveText.parentNode.removeChild(toRemoveText);
+            }
+            counter = 0;
+            
+        })
+
+        // When page loads, run init function
+        window.addEventListener('load', init);
+
+        // init function
+        function init() {
+
+            // access post button 
+            let postButton = document.getElementById("post");
+            let inputText = document.getElementById("inputText");
+
+            // when post button is clicked
+            postButton.addEventListener('click', addListItem);
+            function addListItem(event){
+                if(inputText.value){
+                    console.log("input test value: " + inputText.value);
+                    // send list item to server
+                    socket.emit('addListItem', inputText.value);
+                }
+                
+            }
+        }
+
+        function listBoxCreated(id, item){
+            let itemBox = document.getElementById(id);
+            //console.log(itemBox)
+            itemBox.addEventListener("click", changeItemState);
+            function changeItemState(event){
+                // mark that item as checked
+                //itemBox.innerHTML = "&#10004";
+                // send the updated state of this item to other users
+                //console.log(item);
+                socket.emit('updateItemState', item);
+            }
+        }
+        </script>
+        <style>
+            .title {
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            }
+            .input {
+                width: 20vw;
+                height: 2vw;
+            }
+            .postButton {
+                 width: 6vw;
+                 height: 2vw;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                font-size: 12pt;
+                color: #3D5168;
+                border-radius: 6pt;
+                background-color: white;
+            }
+            .postButton:hover {
+                 background-color: #ddd;
+            }
+        </style>
+    </head>
+    
+    <body style="background-color: aquamarine;">
+        <center>
+            <h1 class="title">Grocery List</h1>
+            <input id="inputText" class="input" type="text"></input>
+            <br><br>
+            <button id="post" class="postButton">submit</button>
+        </center>
+        
+    </body>
+</html>
