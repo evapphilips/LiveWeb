@@ -56,6 +56,12 @@ io.sockets.on('connection',
         io.sockets.emit('posData', data);
     });
 
+    // when a username is made
+    socket.on('shareName', function(data){
+      console.log(data)
+      // share name
+      io.sockets.emit('shareName', data);
+    });
 
     socket.on('disconnect', function() {
       console.log("Client has disconnected");
